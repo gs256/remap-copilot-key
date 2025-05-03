@@ -120,6 +120,13 @@ LRESULT CALLBACK handleKeyboardEvent(int iCode, WPARAM wParam, LPARAM lParam) {
 
 
 int main() {
+    HANDLE hMutex = CreateMutex(NULL, FALSE, L"Global\\remap-copilot-key");
+
+    // Ensure only one instance of the app is running
+    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+        return 1;
+    }
+
     HHOOK hHook = SetWindowsHookEx(WH_KEYBOARD_LL, handleKeyboardEvent, NULL, NULL);
 
     MSG msg = { 0 };
@@ -129,6 +136,11 @@ int main() {
     }
 
     UnhookWindowsHookEx(hHook);
+
+    if (hMutex) {
+        ReleaseMutex(hMutex);
+        CloseHandle(hMutex);
+    }
 
     return 0;
 }
