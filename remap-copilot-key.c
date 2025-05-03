@@ -119,7 +119,7 @@ LRESULT CALLBACK handleKeyboardEvent(int iCode, WPARAM wParam, LPARAM lParam) {
 }
 
 
-int main() {
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     HANDLE hMutex = CreateMutex(NULL, FALSE, L"Global\\remap-copilot-key");
 
     // Ensure only one instance of the app is running
