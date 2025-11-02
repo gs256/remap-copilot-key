@@ -4,28 +4,29 @@
 
 // https://learn.microsoft.com/en-us/windows/win32/inputdev/about-keyboard-input#scan-codes
 #define RIGHT_CTRL_SCAN_CODE 0x1D
+#define MENU_SCAN_CODE 0xE05D
 
 // Sent when copilot key is pressed
 INPUT emulatedCtrlDownInputs[] = {
     // Release win
     {
         .type = INPUT_KEYBOARD,
-        .ki = {.wVk = VK_LWIN, .dwFlags = KEYEVENTF_KEYUP }
+        .ki = { .wVk = VK_LWIN, .dwFlags = KEYEVENTF_KEYUP }
     },
     // Release shift
     {
         .type = INPUT_KEYBOARD,
-        .ki = {.wVk = VK_LSHIFT, .dwFlags = KEYEVENTF_KEYUP }
+        .ki = { .wVk = VK_LSHIFT, .dwFlags = KEYEVENTF_KEYUP }
     },
     // Release f23
     {
         .type = INPUT_KEYBOARD,
-        .ki = {.wVk = VK_F23, .dwFlags = KEYEVENTF_KEYUP }
+        .ki = { .wVk = VK_F23, .dwFlags = KEYEVENTF_KEYUP }
     },
     // Press right ctrl
     {
         .type = INPUT_KEYBOARD,
-        .ki = {.wScan = RIGHT_CTRL_SCAN_CODE, .dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY, .wVk = 0 }
+        .ki = { .wScan = 0, .dwFlags = KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY, .wVk = 0 }
     }
 };
 
@@ -34,7 +35,7 @@ INPUT emulatedCtrlUpInputs[] = {
     // Release right ctrl
     {
         .type = INPUT_KEYBOARD,
-        .ki = {.wScan = RIGHT_CTRL_SCAN_CODE, .dwFlags = KEYEVENTF_KEYUP | KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY, .wVk = 0 }
+        .ki = { .wScan = 0, .dwFlags = KEYEVENTF_KEYUP | KEYEVENTF_SCANCODE | KEYEVENTF_EXTENDEDKEY, .wVk = 0 }
     }
 };
 
@@ -118,6 +119,38 @@ LRESULT CALLBACK handleKeyboardEvent(int iCode, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(NULL, iCode, wParam, lParam);
 }
 
+bool executableContainsSubstring(const wchar_t* substring) {
+    wchar_t path[MAX_PATH];
+    GetModuleFileName(NULL, path, MAX_PATH);
+
+    wchar_t* filename = wcsrchr(path, L'\\');
+    if (filename)
+        filename++;
+    else
+        filename = path;
+
+    wchar_t lower[MAX_PATH];
+    wcsncpy_s(lower, MAX_PATH, filename, _TRUNCATE);
+    _wcslwr_s(lower, MAX_PATH);
+
+    return wcsstr(lower, substring);
+}
+
+void setTargetKeyBasedOnExecutableName()
+{
+    WORD targetKey;
+    if (executableContainsSubstring(L"ctrl"))
+        targetKey = RIGHT_CTRL_SCAN_CODE;
+    else if (executableContainsSubstring(L"menu"))
+        targetKey = MENU_SCAN_CODE;
+    else {
+        printf("invalid executable name\n");
+        exit(EXIT_FAILURE);
+    }
+
+    emulatedCtrlDownInputs[3].ki.wScan = targetKey;
+    emulatedCtrlUpInputs[0].ki.wScan = targetKey;
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     HANDLE hMutex = CreateMutex(NULL, FALSE, L"Global\\remap-copilot-key");
@@ -126,6 +159,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
         return 1;
     }
+
+    setTargetKeyBasedOnExecutableName();
 
     HHOOK hHook = SetWindowsHookEx(WH_KEYBOARD_LL, handleKeyboardEvent, NULL, NULL);
 
