@@ -153,7 +153,7 @@ void setTargetKeyBasedOnExecutableName()
     emulateWhenCopilotReleased[0].ki.wScan = targetKey;
 }
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR lpCmdLine, int nCmdShow) {
     HANDLE hMutex = CreateMutex(NULL, FALSE, L"Global\\remap-copilot-key");
 
     // Ensure only one instance of the app is running
@@ -163,7 +163,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     setTargetKeyBasedOnExecutableName();
 
-    HHOOK hHook = SetWindowsHookEx(WH_KEYBOARD_LL, handleKeyboardEvent, NULL, NULL);
+    HHOOK hHook = SetWindowsHookEx(WH_KEYBOARD_LL, handleKeyboardEvent, NULL, 0);
 
     MSG msg = { 0 };
     while (GetMessage(&msg, NULL, 0, 0)) {
