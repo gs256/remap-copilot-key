@@ -1,20 +1,27 @@
 # Remap Copilot Key
 
-Reassigns `Copilot` key back to `Ctrl` without PowerToys
+Reassigns `Copilot` key back to `Ctrl` or `Menu` without PowerToys
 
 <img src="assets/keyboard-image.jpg" width=400/>
 
 ## How does it work?
 
-`Copilot` key triggers `Win+Shift+F23` shortcut. This app sets up a hook for Windows keyboard events and emulates `Ctrl` if it encounters `Win+Shift+F23` combination.
+`Copilot` key triggers `Win+Shift+F23` shortcut. This app sets up a hook for Windows keyboard events and emulates `Ctrl`/`Menu` if it encounters `Win+Shift+F23` combination.
+
+**Executable names:**
+
+-   `remap-copilot-to-ctrl.exe` - reassigns `Copilot` key to `Ctrl` key
+-   `remap-copilot-to-menu.exe` - reassigns `Copilot` key to `Menu/Application` key
+
+It's the same executable under the hood, but it behaves differently depending on its name. You can rename it yourself to change its behavior, but you'll also need to terminate the old process in Task Manager, since only one instance of the app can run at a time.
 
 ## Installation
 
-1. Download [latest release](https://github.com/gs256/remap-copilot-key/releases/latest).
+1. Download one of the executables from the [latest release](https://github.com/gs256/remap-copilot-key/releases/latest) depending on the key you want to reassign Copilot to.
 
 2. Press `Win+R`, type `shell:startup` and press `Enter` to open the Start-up folder.
 
-3. Copy downloaded `remap-copilot-key.exe` file into the Start-up folder to have it run automatically when Windows starts.
+3. Copy downloaded executable into the Start-up folder to have it run automatically when Windows starts.
 
 4. Double-click the executable to launch it manually for the first time.
 
